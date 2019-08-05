@@ -1,0 +1,74 @@
+import numpy as np
+import itertools
+import scipy.stats as st
+from sklearn.metrics import accuracy_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import Normalizer
+
+def DACompare(input1, input2):
+	D1_Data  = input1[:,:39]
+	D1_Index = input1[:,39]
+	D1_Targets = input1[:,40]
+	
+	D1_Normalizer = Normalizer()
+	D1_Data = D1_Normalizer.fit_transform(D1_Data)
+	
+	D2_Data  = input2[:,:39]
+	D2_Index = input2[:,39]
+	D2_Targets = input2[:,40]
+	
+	D2_Normalizer = Normalizer()
+	D2_Data = D2_Normalizer.fit_transform(D2_Data)
+	
+	index = 0
+	scoreNDA = np.zeros(16)
+	scoreDA = np.zeros(16)
+	
+	for i in np.unique(D1_Targets):
+		
+		Xs = D1_Data[D1_Index != i]
+		Xs_labels = D1_Targets[D1_Index != 1]
+		D1_PCA = PCA(n_components = 12)
+		D1_PCA.fit(Xs)
+		PXs = np.transpose(D1_PCA.components_)
+		
+		Xt = D2_Data[D2_Index == i]
+		Xt_labels = D2_Targets[D2_Index == 1]
+		D2_PCA = PCA(n_components = 12)
+		D2_PCA.fit(Xt)
+		PXt = np.transpose(D2_PCA.components_)
+		###################################################
+		treeNDA = RandomForestClassifier(n_estimators = 250)
+		treeNDA.fit(Xs, Xs_labels)
+		predNDA = treeNDA.predict(Xt)
+		scoreNDA[index] = accuracy_score(Xt_labels, predNDA)
+		###################################################
+		
+		treeDA = RandomForestClassifier(n_estimators = 250)
+		Xs_DA = 
+		Xt_Da = 
+		treeDA.fit(Xs_DA, Xs_labels)
+		predDA = treeDA.predict(Xt_Da)
+		scoreDA[index] = accuracy_score(Xt_labels, predDA)
+		
+		index = index + 1
+		
+	return(scoresNDA, scoresDA)
+	
+	
+dataNames = np.array(["RW", "LW", "Thigh", "Hip"])
+dataSets = np.array([read("RW.npy"),read("LW.npy"),read("Thigh.npy"),read("Hip.npy")], dtype = object)
+
+for i in itertools.combinations(np.arange(4), 2)
+	
+	NDA_scores, DA_scores = DACompare(dataSets[i[0]], dataSets[i[1]])
+	increase = np.mean(DA_scores) - np.mean(NDA_scores)
+	F, p = st.f_oneway(NDA_scores, DA_scores)
+	print("Predicting %s with %s:"%(dataNames[i[0]], dataNames[i[1]]))
+	print("NDA scores are: %s"%(NDA_scores))
+	print("DA scores are: %s"%(DA_scores))
+	print("Using DA gives a mean increase of %f" %(increase))
+	print("This gives an F_statistic of %f, p = %f"%(F, p))
+	print()
+	
